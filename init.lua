@@ -1,10 +1,10 @@
-local inspect = require("lib/inspect")
 SimpleUtils = {}
 
 SimpleUtils.ItemUI = require("tools/itemui")
 SimpleUtils.Dumper = require("tools/dumper")
 SimpleUtils.Cheats = require("tools/cheats")
 SimpleUtils.Teleporter = require("tools/teleport")
+SimpleUtils.Debug = false
 
 local isOverlayVisible = false
 
@@ -24,10 +24,17 @@ function SimpleUtils:Render()
   local infoFlags = ImGuiWindowFlags.AlwaysAutoResize + ImGuiWindowFlags.NoTitleBar + ImGuiWindowFlags.NoMove
   if not isOverlayVisible then infoFlags = infoFlags + ImGuiWindowFlags.NoBackground end
 
-  ImGui.SetNextWindowPos(0, 0)
-  if ImGui.Begin('Player Info', infoFlags) then
-    ImGui.Text("FPS: " .. tostring(math.floor(SimpleUtils.FPS)))
-    ImGui.Text("Position: " .. Game.GetPlayerObject():GetWorldPosition():ToString())
+  if (SimpleUtils.Debug or isOverlayVisible) and ImGui.Begin('Debug Info', infoFlags) then
+    ImGui.SetWindowPos(0, 0)
+
+    if SimpleUtils.Debug then
+      ImGui.Text("FPS: " .. tostring(math.floor(SimpleUtils.FPS)))
+      ImGui.Text("Position: " .. Game.GetPlayerObject():GetWorldPosition():ToString())
+    end
+
+    if isOverlayVisible then
+      SimpleUtils.Debug = ImGui.Checkbox("Show debug info", SimpleUtils.Debug)
+    end
 
     ImGui.End()
   end
