@@ -155,6 +155,8 @@ function ItemUI:DrawGUI()
 
             if ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) then
               local record = SimpleUtils.Dumper.Records[id]
+              local type = Game.GetLocalizedTextByKey(record:ItemType():LocalizedType())
+              if type == "" then type = cat end
 
               ImGui.PushStyleColor(ImGuiCol.Border, RGBtoPackedABGR(color))
               ImGui.BeginTooltip()
@@ -164,7 +166,7 @@ function ItemUI:DrawGUI()
               ImGui.PopStyleColor()
 
               ImGui.PushStyleColor(ImGuiCol.Text, RGBtoPackedABGR({231, 76, 60}))
-              ImGui.Text(Game.GetLocalizedTextByKey(record:ItemType():LocalizedType()))
+              ImGui.Text(type)
               ImGui.PopStyleColor()
 
               local locDesc = Game.GetLocalizedTextByKey(record:LocalizedDescription())
