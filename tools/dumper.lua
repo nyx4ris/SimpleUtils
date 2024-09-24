@@ -4,6 +4,7 @@ ImGui = ImGui or {}
 local isInitialized = false
 
 function Dumper:Dump()
+  SimpleUtils.Logger:Log("Dumper", "Dumping, please wait...")
   local itemClasses = {"gamedataClothing_Record", "gamedataWeaponItem_Record", "gamedataRecipeItem_Record", "gamedataConsumableItem_Record", "gamedataItem_Record", "gamedataGrenade_Record"}
   local vehicleClasses = {"gamedataVehicle_Record"}
   local allRecords = {}
@@ -27,7 +28,11 @@ function Dumper:Dump()
 
     local class = "Uncategorized"
     local locClass = record:ItemCategory()
-    if locClass ~= nil then class = locClass:Name().value elseif itemRecord:find("Items.w_") then class = "Attachments" end
+    if locClass ~= nil then
+      class = locClass:Name().value
+    elseif itemRecord:find("Items.w_") then
+      class = "Attachments"
+    end
     if itemRecord:find("Ammo.") then class = "Ammo" end
     if class == "WeaponMod" then class = "Mod" end
 
@@ -52,9 +57,7 @@ function Dumper:Dump()
     local locName = TDB.GetLocKey(vehicleRecord .. '.displayName')
     local name = Game.GetLocalizedTextByKey(locName)
 
-    if name ~= "" then
-      vehicles[vehicleRecord] = name
-    end
+    if name ~= "" then vehicles[vehicleRecord] = name end
   end
 
   SimpleUtils.Dumper.Items = items
@@ -63,29 +66,26 @@ function Dumper:Dump()
   SimpleUtils.Dumper.Dumped = true
   SimpleUtils.ItemUI:Filter()
   SimpleUtils.VehicleUI:Filter()
+
+  SimpleUtils.Logger:Log("Dumper", "Successfully dumped item table!")
 end
 
-function Dumper:new()
-  registerForEvent('onInit', function()
-    ObserveAfter('EquipmentSystem', 'OnPlayerAttach', function()
-      Dumper:Dump()
-      isInitialized = true
-      SimpleUtils.Logger:Log("Dumper", "Successfully dumped item table!")
-    end)
-
-    if Game.GetPlayer() ~= nil then
-      if not isInitialized then
-        Dumper:Dump()
-        SimpleUtils.Logger:Log("Dumper", "Successfully dumped item table!")
-      end
-
-      isInitialized = true
-    else
-      isInitialized = false
-    end
+function Dumper:OnInit()
+  ObserveAfter('EquipmentSystem', 'OnPlayerAttach', function()
+    self:Dump()
+    isInitialized = true
   end)
-
-  return Dumper
 end
 
-return Dumper:new()
+function Dumper:OnUpdate()
+  if Game.GetPlayer() ~= nil then
+    if not isInitialized then
+      self:Dump()
+      isInitialized = true
+    end
+  else
+    isInitialized = false
+  end
+end
+
+return Dumper
