@@ -12,9 +12,6 @@ jobs:
               shell: bash
               run: mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods
 
-            - name: Install 7-Zip
-              uses: milliewalky/setup-7-zip@v1
-
             - name: Check out code
               uses: actions/checkout@v4
               with:
