@@ -8,6 +8,10 @@ jobs:
     name: "Publish Pre-Release"
     runs-on: [ubuntu-latest]
     steps:
+      - name: Set outputs
+        id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Make path
         shell: bash
         run: mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods
@@ -19,11 +23,11 @@ jobs:
 
       - name: Make archive
         shell: bash
-        run: 7z a -tzip SimpleUtils.zip bin
+        run: 7z a -xr'!.*' -tzip SimpleUtils.zip bin
 
       - uses: ncipollo/release-action@v1
         with:
-          tag: ${{ github.ref_name }}-${{ github.sha }}
-          name: SimpleUtils ${{ github.sha }}
+          tag: ${{ github.ref_name }}-${{ steps.vars.outputs.sha_short }}
+          name: SimpleUtils ${{ steps.vars.outputs.sha_short }}
           artifacts: "SimpleUtils.zip"
           prerelease: true
