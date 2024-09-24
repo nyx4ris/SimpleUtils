@@ -1,1 +1,1 @@
-build = "commit"
+build = "{commit}"
