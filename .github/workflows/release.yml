@@ -1,0 +1,52 @@
+name: Publish
+
+on:
+    push:
+
+jobs:
+    publish-prerelease:
+        name: "Publish Pre-Release"
+        runs-on: [ubuntu-latest]
+        steps:
+            - name: Make path
+              shell: bash
+              run: mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods
+
+            - name: Install 7-Zip
+              uses: milliewalky/setup-7-zip@v1
+
+            - name: Check out code
+              uses: actions/checkout@v4
+              with:
+                path: bin/x64/plugins/cyber_engine_tweaks/mods
+
+            - name: Make archive
+              shell: bash
+              run: 7z a -tzip SimpleUtils.zip bin
+
+            - name: Create Draft Release
+              id: create_release
+              uses: actions/create-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  tag_name: ${{ github.sha }}
+                  release_name: Simple Utils ${{ github.sha }}
+                  draft: false
+                  prerelease: true
+
+            - name: Upload Asset
+              uses: actions/upload-release-asset@v1.0.1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  upload_url: ${{ steps.create_release.outputs.upload_url }}
+                  asset_path: ./SimpleUtils.zip
+                  asset_name: SimpleUtils.zip
+                  asset_content_type: application/zip
+
+            - uses: eregon/publish-release@v1
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                  release_id: ${{ steps.create_release.outputs.id }}
