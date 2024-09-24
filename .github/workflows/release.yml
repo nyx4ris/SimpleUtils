@@ -20,30 +20,34 @@ jobs:
             - name: Make archive
               shell: bash
               run: 7z a -tzip SimpleUtils.zip bin
-
-            - name: Create Draft Release
-              id: create_release
-              uses: actions/create-release@v1
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              
+            - uses: ncipollo/release-action@v1
               with:
-                  tag_name: ${{ github.sha }}
-                  release_name: Simple Utils ${{ github.sha }}
-                  draft: false
-                  prerelease: true
+                artifacts: "SimpleUtils.zip"
 
-            - name: Upload Asset
-              uses: actions/upload-release-asset@v1.0.1
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  upload_url: ${{ steps.create_release.outputs.upload_url }}
-                  asset_path: ./SimpleUtils.zip
-                  asset_name: SimpleUtils.zip
-                  asset_content_type: application/zip
+            #- name: Create Draft Release
+            #  id: create_release
+            #  uses: actions/create-release@v1
+            #  env:
+            #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            #  with:
+            #      tag_name: ${{ github.sha }}
+            #      release_name: Simple Utils ${{ github.sha }}
+            #      draft: false
+            #      prerelease: true
 
-            - uses: eregon/publish-release@v1
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  release_id: ${{ steps.create_release.outputs.id }}
+            #- name: Upload Asset
+            #  uses: actions/upload-release-asset@v1.0.1
+            #  env:
+            #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            #  with:
+            #      upload_url: ${{ steps.create_release.outputs.upload_url }}
+            #      asset_path: ./SimpleUtils.zip
+            #      asset_name: SimpleUtils.zip
+            #      asset_content_type: application/zip
+
+            #- uses: eregon/publish-release@v1
+            #  env:
+            #      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            #  with:
+            #      release_id: ${{ steps.create_release.outputs.id }}
