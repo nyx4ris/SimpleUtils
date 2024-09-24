@@ -8,18 +8,18 @@ jobs:
     name: "Publish Pre-Release"
     runs-on: [ubuntu-latest]
     steps:
-      - name: Set outputs
-        id: vars
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
       - name: Make path
         shell: bash
-        run: mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods
+        run: mkdir -p bin/x64/plugins/cyber_engine_tweaks/mods/SimpleUtils
 
       - name: Check out code
         uses: actions/checkout@v4
         with:
-          path: bin/x64/plugins/cyber_engine_tweaks/mods
+          path: bin/x64/plugins/cyber_engine_tweaks/mods/SimpleUtils
+
+      - name: Set outputs
+        id: vars
+        run: cd bin/x64/plugins/cyber_engine_tweaks/mods/SimpleUtils;echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
       - name: Make archive
         shell: bash
