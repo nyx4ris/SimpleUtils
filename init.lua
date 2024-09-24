@@ -46,18 +46,24 @@ function SimpleUtils:Render()
       ImGui.End()
       return
     end
+
     if ImGui.BeginTabBar("Tabs") then
       if ImGui.BeginTabItem(IconGlyphs.Console .. " Cheats") then
+        ImGui.Spacing()
         flags = ImGuiWindowFlags.AlwaysAutoResize
 
         if ImGui.BeginTabBar("Cheat Tabs") then
           if ImGui.BeginTabItem("Impulse") then
+            ImGui.Spacing()
+
             for k, v in pairs(SimpleUtils.Cheats.Buttons) do if ImGui.Button(v.name) then v.callback() end end
 
             ImGui.EndTabItem()
           end
 
           if ImGui.BeginTabItem("Toggles") then
+            ImGui.Spacing()
+
             for k, v in pairs(SimpleUtils.Cheats.Checkboxes) do
               local enabled = SimpleUtils.Cheats.Checkboxes[k].enabled
               enabled = ImGui.Checkbox(v.name, enabled)
@@ -76,12 +82,14 @@ function SimpleUtils:Render()
       end
 
       if ImGui.BeginTabItem(IconGlyphs.StorageTank .. " Items") then
+        ImGui.Spacing()
         SimpleUtils.ItemUI:DrawGUI()
 
         ImGui.EndTabItem()
       end
 
       if ImGui.BeginTabItem(IconGlyphs.PlaneTrain .. " Teleporter") then
+        ImGui.Spacing()
         SimpleUtils.Teleporter:DrawGUI()
 
         ImGui.EndTabItem()
