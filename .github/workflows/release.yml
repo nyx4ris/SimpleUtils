@@ -23,6 +23,7 @@ jobs:
               
             - uses: ncipollo/release-action@v1
               with:
+                name: SimpleUtils ${{ github.sha }}
                 artifacts: "SimpleUtils.zip"
 
             #- name: Create Draft Release
