@@ -21,6 +21,13 @@ jobs:
         id: vars
         run: cd bin/x64/plugins/cyber_engine_tweaks/mods/SimpleUtils;echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+      - name: Update variables
+        shell: bash
+        env:
+          commit: ${{ steps.vars.outputs.sha_short }}
+        run:  |
+          sed -i "s/{commit}/$server_ip/g" bin/x64/plugins/cyber_engine_tweaks/mods/SimpleUtils/info.lua
+
       - name: Make archive
         shell: bash
         run: 7z a -xr'!.*' -tzip SimpleUtils.zip bin
