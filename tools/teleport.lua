@@ -19,9 +19,9 @@ end
 function Teleporter:DrawGUI()
   if not Teleporter.Enabled then return end
 
-  ImGui.SetWindowSize(320, 480)
+  ImGui.SetWindowSize(330, 480)
 
-  ImGui.SetNextItemWidth(205)
+  ImGui.SetNextItemWidth(213)
   name = ImGui.InputText("##Name", name, 128)
   ImGui.SameLine()
   if ImGui.Button("Add Waypoint") then

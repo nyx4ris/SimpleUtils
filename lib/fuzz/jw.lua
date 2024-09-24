@@ -73,7 +73,9 @@ local function jaro_winkler_distance(s1, s2, p)
     return jaro_dist + (prefix_length * p * (1 - jaro_dist))
 end
 
-return function(query, items)
+local jw = {}
+
+function jw.filter(query, items)
     local filtered = {}
     for _, item in pairs(items) do
       local dist = jaro_winkler_distance(query, item)
@@ -89,3 +91,9 @@ return function(query, items)
 
     return filtered
 end
+
+function jw.match(query, item)
+    return jaro_winkler_distance(query, item) < 0.5
+end
+
+return jw

@@ -4,40 +4,65 @@ ImGui = ImGui or {}
 local isInitialized = false
 
 function Dumper:Dump()
-  local classNames = {"gamedataClothing_Record", "gamedataWeaponItem_Record", "gamedataRecipeItem_Record", "gamedataConsumableItem_Record", "gamedataItem_Record", "gamedataGrenade_Record"}
+  local itemClasses = {"gamedataClothing_Record", "gamedataWeaponItem_Record", "gamedataRecipeItem_Record", "gamedataConsumableItem_Record", "gamedataItem_Record", "gamedataGrenade_Record"}
+  local vehicleClasses = {"gamedataVehicle_Record"}
+  local allRecords = {}
 
   local items = {}
-  local recordNames = {}
-  for _, className in pairs(classNames) do
-    local records = TweakDB:GetRecords(className) or {}
+  local itemRecords = {}
+  for _, itemClass in pairs(itemClasses) do
+    local records = TweakDB:GetRecords(itemClass) or {}
     for _, record in ipairs(records) do
       local recordId = record:GetID()
-      recordNames[tostring(recordId.value)] = record
+      itemRecords[tostring(recordId.value)] = record
+      allRecords[tostring(recordId.value)] = record
     end
   end
 
-  for recordName, record in pairs(recordNames) do
-    local locName = TDB.GetLocKey(recordName .. '.displayName')
+  for itemRecord, record in pairs(itemRecords) do
+    local locName = TDB.GetLocKey(itemRecord .. '.displayName')
     local quality = "Unknown"
     if record:Quality() then quality = record:Quality():Name() end
     local name = " " .. Game.GetLocalizedTextByKey(locName) .. " ##" .. quality
 
     local class = "Uncategorized"
     local locClass = record:ItemCategory()
-    if locClass ~= nil then class = locClass:Name().value elseif recordName:find("Items.w_") then class = "Attachments" end
-    if recordName:find("Ammo.") then class = "Ammo" end
+    if locClass ~= nil then class = locClass:Name().value elseif itemRecord:find("Items.w_") then class = "Attachments" end
+    if itemRecord:find("Ammo.") then class = "Ammo" end
     if class == "WeaponMod" then class = "Mod" end
 
-    if name:gsub("%s*(.*)%s*##.*", "%1") ~= "" and not recordName:lower():find("shard", 1, true) then
+    if name:gsub("%s*(.*)%s*##.*", "%1") ~= "" and not itemRecord:lower():find("shard", 1, true) then
       items[class] = items[class] or {}
-      items[class][name] = recordName
+      items[class][name] = itemRecord
+    end
+  end
+
+  local vehicles = {}
+  local vehicleRecords = {}
+  for _, vehicleClass in pairs(vehicleClasses) do
+    local records = TweakDB:GetRecords(vehicleClass) or {}
+    for _, record in ipairs(records) do
+      local recordId = record:GetID()
+      vehicleRecords[tostring(recordId.value)] = record
+      allRecords[tostring(recordId.value)] = record
+    end
+  end
+
+  for vehicleRecord, _ in pairs(vehicleRecords) do
+    local locName = TDB.GetLocKey(vehicleRecord .. '.displayName')
+    local name = Game.GetLocalizedTextByKey(locName)
+
+    if name ~= "" then
+      vehicles[vehicleRecord] = name
     end
   end
 
   SimpleUtils.Dumper.Items = items
-  SimpleUtils.Dumper.Records = recordNames
+  SimpleUtils.Dumper.Records = allRecords
+  SimpleUtils.Dumper.Vehicles = vehicles
   SimpleUtils.Dumper.Dumped = true
   SimpleUtils.ItemUI:Filter()
+  SimpleUtils.VehicleUI:Filter()
 end
 
 function Dumper:new()

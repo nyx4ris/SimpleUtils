@@ -1,5 +1,5 @@
 local fzy = require("lib/fuzz/fzy").filter
-local jw = require("lib/fuzz/jw")
+local jw = require("lib/fuzz/jw").filter
 
 ItemUI = {Enabled = true}
 ImGui = ImGui or {}
@@ -11,7 +11,7 @@ local hasMatches = true
 local filteredItems = {}
 local filterQuality = 0
 
-local algorithms = {"string.find", "fzy", "jaro-winkler"}
+local algorithms = {"string.find", "fzy"}
 
 local Colors = {["Random"] = {127, 132, 156}, ["Uncommon"] = {166, 227, 161}, ["Rare"] = {137, 180, 250}, ["Epic"] = {203, 166, 247}, ["Legendary"] = {250, 179, 135}}
 local qualities = {"All", "Random", "Common", "Common+", "Uncommon", "Uncommon+", "Rare", "Rare+", "Epic", "Epic+", "Legendary", "Legendary+", "Legendary++"}

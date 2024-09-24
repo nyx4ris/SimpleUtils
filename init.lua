@@ -1,9 +1,13 @@
+local inspect = require("lib/inspect")
+
 SimpleUtils = {}
 
 SimpleUtils.ItemUI = require("tools/itemui")
+SimpleUtils.VehicleUI = require("tools/vehicleui")
 SimpleUtils.Dumper = require("tools/dumper")
 SimpleUtils.Cheats = require("tools/cheats")
 SimpleUtils.Teleporter = require("tools/teleport")
+--SimpleUtils.Player = require("tools/player")
 SimpleUtils.Debug = false
 
 local isOverlayVisible = false
@@ -28,8 +32,25 @@ function SimpleUtils:Render()
     ImGui.SetWindowPos(0, 0)
 
     if SimpleUtils.Debug then
-      ImGui.Text("FPS: " .. tostring(math.floor(SimpleUtils.FPS)))
-      ImGui.Text("Position: " .. Game.GetPlayerObject():GetWorldPosition():ToString())
+      if not isOverlayVisible then
+        ImGui.Text("FPS: " .. tostring(math.floor(SimpleUtils.FPS)))
+        ImGui.Text("Position: " .. Game.GetPlayerObject():GetWorldPosition():ToString())
+      elseif ImGui.BeginTabBar("Tabs") then
+        if ImGui.BeginTabItem("Game") then
+          ImGui.Text("FPS: " .. tostring(math.floor(SimpleUtils.FPS)))
+          ImGui.Text("Position: " .. Game.GetPlayerObject():GetWorldPosition():ToString())
+
+          ImGui.EndTabItem()
+        end
+
+        if ImGui.BeginTabItem("SimpleUI") then
+          ImGui.Text(inspect(SimpleUtils))
+
+          ImGui.EndTabItem()
+        end
+
+        ImGui.EndTabBar()
+      end
     end
 
     if isOverlayVisible then
@@ -81,6 +102,13 @@ function SimpleUtils:Render()
         flags = ImGuiWindowFlags.NoResize
       end
 
+--      if ImGui.BeginTabItem(IconGlyphs.Account .. " Player") then
+--        ImGui.Spacing()
+--        SimpleUtils.Player:DrawGUI()
+--
+--        ImGui.EndTabItem()
+--      end
+
       if ImGui.BeginTabItem(IconGlyphs.StorageTank .. " Items") then
         ImGui.Spacing()
         SimpleUtils.ItemUI:DrawGUI()
@@ -88,7 +116,14 @@ function SimpleUtils:Render()
         ImGui.EndTabItem()
       end
 
-      if ImGui.BeginTabItem(IconGlyphs.PlaneTrain .. " Teleporter") then
+      if ImGui.BeginTabItem(IconGlyphs.Car .. " Vehicles") then
+        ImGui.Spacing()
+        SimpleUtils.VehicleUI:DrawGUI()
+
+        ImGui.EndTabItem()
+      end
+
+      if ImGui.BeginTabItem(IconGlyphs.MapMarker .. " Teleporter") then
         ImGui.Spacing()
         SimpleUtils.Teleporter:DrawGUI()
 
