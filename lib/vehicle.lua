@@ -39,8 +39,3 @@ function Autopilot(veh, target, minSpeed, maxSpeed, clearTraffic, useKinematic, 
   AINPCCommandEvent.command = cmd
   veh:QueueEvent(AINPCCommandEvent)
 end
-
-Observe('ExitEvents', 'OnEnter', function()
-  local veh = GetPlayer():GetMountedVehicle()
-  if veh then VehicleCancelLastCommand(veh) end
-end)

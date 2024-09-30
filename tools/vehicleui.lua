@@ -84,8 +84,6 @@ function VehicleUI:DrawGUI()
     ImGui.Text("No matches found for \"" .. filter .. "\"\nPlease try another query.")
   else
     for vehicle, id in pairs(filteredvehicles) do
-      -- if not id:match(".*_player") then goto continue end
-
       local name = SimpleUtils.Dumper.Vehicles[id]
       local record = SimpleUtils.Dumper.Records[id]
 
@@ -117,9 +115,15 @@ function VehicleUI:DrawGUI()
 
         ImGui.EndTooltip()
       end
-      -- ::continue::
     end
   end
+end
+
+function VehicleUI:OnInit()
+  Observe('ExitEvents', 'OnEnter', function()
+    local veh = GetPlayer():GetMountedVehicle()
+    if veh then VehicleCancelLastCommand(veh) end
+  end)
 end
 
 return VehicleUI

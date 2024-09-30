@@ -10,7 +10,7 @@ SimpleUtils.Dumper = require("tools/dumper")
 SimpleUtils.Cheats = require("tools/cheats")
 SimpleUtils.Teleporter = require("tools/teleport")
 SimpleUtils.Player = require("tools/player")
-SimpleUtils.Debug = false
+SimpleUtils.Debug = (build == "{commit}")
 
 local isOverlayVisible = false
 
@@ -106,10 +106,12 @@ registerForEvent('onOverlayClose', function() isOverlayVisible = false end)
 registerForEvent('onUpdate', function(delta)
   SimpleUtils:UpdateFPS(delta)
   SimpleUtils.Dumper:OnUpdate()
+  SimpleUtils.Player:Process()
 end)
 registerForEvent('onInit', function()
   SimpleUtils.Dumper:OnInit()
   SimpleUtils.Player:OnInit()
+  SimpleUtils.VehicleUI:OnInit()
 end)
 
 SimpleUtils.Logger:Log("Core", "Loaded!")

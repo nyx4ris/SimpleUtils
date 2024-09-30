@@ -60,28 +60,28 @@ function Dumper:Dump()
     if name ~= "" then vehicles[vehicleRecord] = name end
   end
 
+  SimpleUtils.Logger:Log("Dumper", "Successfully dumped item table!")
+
+  SimpleUtils.Dumper.Dumped = true
   SimpleUtils.Dumper.Items = items
   SimpleUtils.Dumper.Records = allRecords
   SimpleUtils.Dumper.Vehicles = vehicles
-  SimpleUtils.Dumper.Dumped = true
   SimpleUtils.ItemUI:Filter()
   SimpleUtils.VehicleUI:Filter()
-
-  SimpleUtils.Logger:Log("Dumper", "Successfully dumped item table!")
 end
 
 function Dumper:OnInit()
   ObserveAfter('EquipmentSystem', 'OnPlayerAttach', function()
-    self:Dump()
     isInitialized = true
+    self:Dump()
   end)
 end
 
 function Dumper:OnUpdate()
   if Game.GetPlayer() ~= nil then
     if not isInitialized then
-      self:Dump()
       isInitialized = true
+      self:Dump()
     end
   else
     isInitialized = false

@@ -4,6 +4,7 @@ Player = {Enabled = true}
 ImGui = ImGui or {}
 
 local infiniteAmmo = false
+local noReload = false
 
 local vehicleGodMode = false
 local infiniteVehicleAmmo = false
@@ -18,6 +19,8 @@ local recoverySpeed = 1
 local quickhackCost = 1
 local quickhackSpeed = 1
 local customMappin
+
+local godMode = false
 
 local function getWeaponAndAmmo()
   local player = Game.GetPlayer()
@@ -36,15 +39,18 @@ local function getWeaponAndAmmo()
 end
 
 function Player:Process()
+  local weapon = Game.GetPlayer():GetWeaponRight()
   local gotAmmoType, ammoType, currentAmmo = getWeaponAndAmmo()
 
   if infiniteAmmo and gotAmmoType and currentAmmo < 200 then Game.AddToInventory(ammoType, 1000) end
+  if noReload and weapon and weapon:GetMagazineAmmoCount() <= 0 then
+    weapon:StartReload(-1)
+    weapon:StopReload(gameweaponReloadStatus.Standard)
+  end
 end
 
 function Player:DrawGUI()
   if not Player.Enabled then return end
-
-  self:Process()
 
   ImGui.SetWindowSize(360, 480)
 
@@ -53,6 +59,17 @@ function Player:DrawGUI()
     if ImGui.BeginTabItem(IconGlyphs.Cog .. " General") then
       ImGui.Spacing()
       infiniteAmmo = ImGui.Checkbox(IconGlyphs.Ammunition .. " Infinite Ammo", infiniteAmmo)
+      noReload = ImGui.Checkbox(IconGlyphs.MagazineRifle .. " No Reload", noReload)
+
+      local toggle
+      godMode, toggle = ImGui.Checkbox(IconGlyphs.Skull .. " Godmode", godMode)
+      if toggle then
+        if godMode then
+          Game.GetGodModeSystem():AddGodMode(GetPlayer():GetEntityID(), gameGodModeType.Immortal, 'Default')
+        else
+          Game.GetGodModeSystem():RemoveGodMode(GetPlayer():GetEntityID(), gameGodModeType.Immortal, 'Default')
+        end
+      end
 
       local newPrevSysState, pressed = ImGui.Checkbox(IconGlyphs.PoliceBadge .. " Crime Prevention", prevSys.systemEnabled)
       if pressed then
