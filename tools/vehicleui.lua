@@ -120,10 +120,6 @@ function VehicleUI:DrawGUI()
 end
 
 function VehicleUI:OnInit()
-  Observe('ExitEvents', 'OnEnter', function()
-    local veh = GetPlayer():GetMountedVehicle()
-    if veh then VehicleCancelLastCommand(veh) end
-  end)
 end
 
 return VehicleUI

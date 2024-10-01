@@ -1,20 +1,28 @@
--- Taken mostly from https://github.com/cyberscript77/release/blob/main/bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/mod/modules/npc.lua
-local lastcmd = {}
+local inspect = require "lib/inspect"
 
-function VehicleCancelLastCommand(veh)
-  if (lastcmd[veh] ~= nil) then
+-- Taken mostly from https://github.com/cyberscript77/release/blob/main/bin/x64/plugins/cyber_engine_tweaks/mods/cyberscript/mod/modules/npc.lua
+SimpleUtils.Vehicle = SimpleUtils.Vehicle or {}
+SimpleUtils.Vehicle.LastCommand = {}
+
+function VehicleCancelLastCommand(veh, vehId)
+  vehId = vehId or tostring(veh:GetEntityID().hash)
+
+  if (SimpleUtils.Vehicle.LastCommand[vehId] ~= nil) then
     local AI = veh:GetAIComponent()
-    AI:CancelCommand(lastcmd[veh])
-    AI:StopExecutingCommand(lastcmd[veh], true)
-    lastcmd[veh] = nil
+    AI:CancelCommand(SimpleUtils.Vehicle.LastCommand[vehId])
+    AI:StopExecutingCommand(SimpleUtils.Vehicle.LastCommand[vehId], true)
+    SimpleUtils.Vehicle.LastCommand[vehId] = nil
   end
 end
 
 function VehicleManageCmd(veh, cmd)
-  if (lastcmd[veh] ~= nil) then
-    VehicleCancelLastCommand(veh)
-    lastcmd[veh] = cmd
+  local vehId = tostring(veh:GetEntityID().hash)
+
+  if (SimpleUtils.Vehicle.LastCommand[vehId] ~= nil) then
+    VehicleCancelLastCommand(veh, vehId)
   end
+
+  SimpleUtils.Vehicle.LastCommand[vehId] = cmd
 end
 
 function Autopilot(veh, target, minSpeed, maxSpeed, clearTraffic, useKinematic, minDist)
@@ -38,4 +46,14 @@ function Autopilot(veh, target, minSpeed, maxSpeed, clearTraffic, useKinematic, 
   local AINPCCommandEvent = NewObject("handle:AINPCCommandEvent")
   AINPCCommandEvent.command = cmd
   veh:QueueEvent(AINPCCommandEvent)
+end
+
+function GetState(veh)
+  if veh == nil then return " No vehicle " end
+
+  local vehId = tostring(veh:GetEntityID().hash)
+  local lastcmd = SimpleUtils.Vehicle.LastCommand[vehId]
+  if lastcmd == nil then return " No state " end
+
+  return tostring(lastcmd.state)
 end

@@ -1,6 +1,6 @@
 local inspect = require("lib/inspect")
 
-SimpleUtils = {}
+SimpleUtils = SimpleUtils or {}
 
 require("info")
 
@@ -75,6 +75,7 @@ function SimpleUtils:Render()
       return
     end
     if Game.GetPlayer() == nil then
+      ImGui.SetWindowSize(175, 77)
       ImGui.Text("Player is not initialized yet.\nPlease wait...")
 
       ImGui.End()

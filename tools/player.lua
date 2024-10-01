@@ -1,4 +1,5 @@
 require("lib/vehicle")
+local inspect = require("lib/inspect")
 
 Player = {Enabled = true}
 ImGui = ImGui or {}
@@ -9,6 +10,12 @@ local noReload = false
 local vehicleGodMode = false
 local infiniteVehicleAmmo = false
 
+local targets = {
+  "Custom Map Pin",
+  "Mission Marker (NOT IMPLEMENTED YET)",
+  "0, 0, 0 [DEBUG]"
+}
+local target = (build == "{commit}" and 2 or 0)
 local clearTraffic = true
 local useKinematic = true
 local minDist = 0
@@ -89,26 +96,36 @@ function Player:DrawGUI()
     if ImGui.BeginTabItem(IconGlyphs.Car .. " Autopilot") then
       ImGui.Spacing()
 
+      target = ImGui.Combo("Target", target, targets, #targets)
       clearTraffic = ImGui.Checkbox("Clear traffic", clearTraffic)
       useKinematic = ImGui.Checkbox("Use kinematic", useKinematic)
       minDist = ImGui.SliderInt("Min. Distance", minDist, 0, 100)
-      minSpeed = ImGui.SliderInt("Min. Speed", minSpeed, 20, 200)
-      maxSpeed = ImGui.SliderInt("Max. Speed", maxSpeed, 20, 200)
-      if not customMappin or not veh then ImGui.BeginDisabled() end
+      minSpeed = ImGui.SliderInt("Min. Speed", minSpeed, 10, 100)
+      maxSpeed = ImGui.SliderInt("Max. Speed", maxSpeed, 10, 100)
+      if (target == 0 and not customMappin) or not veh then ImGui.BeginDisabled() end
 
       if ImGui.Button(" Activate ") then
-        local pin = customMappin:GetWorldPosition():Vector4To3()
-        Autopilot(veh, pin, minSpeed / 2, maxSpeed / 2, clearTraffic, useKinematic, minDist)
+        local dest = Vector3.new(0, 0, 0)
+
+        if target == 0 then
+          dest = customMappin:GetWorldPosition():Vector4To3()
+        end
+
+        Autopilot(veh, dest, minSpeed, maxSpeed, clearTraffic, useKinematic, minDist)
       end
       local hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)
 
+      if target == 0 and not customMappin then ImGui.EndDisabled() end
+
       ImGui.SameLine()
-      if ImGui.Button(" Cancel ") then VehicleCancelLastCommand(veh) end
-      hovered = hovered or ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)
+      if ImGui.Button(GetState(veh) or " Cancel ") then
+        VehicleCancelLastCommand(veh)
+      end
+      hovered = hovered or (customMappin and ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
 
-      if not customMappin or not veh then
-        ImGui.EndDisabled()
+      if not veh then ImGui.EndDisabled() end
 
+      if (target == 0 and not customMappin) or not veh then
         if hovered then
           if not veh then
             ImGui.SetTooltip("You are not in a vehicle.")
@@ -117,6 +134,8 @@ function Player:DrawGUI()
           end
         end
       end
+      
+      ImGui.Text(inspect(SimpleUtils.Vehicle.LastCommand))
 
       ImGui.EndTabItem()
     end
@@ -149,6 +168,10 @@ end
 function Player:OnInit()
   Observe('BaseWorldMapMappinController', 'OnUpdate', function(self) if self:GetMappinVariant() == gamedataMappinVariant.CustomPositionVariant then customMappin = self:GetMappin() end end)
   Observe('WorldMapMenuGameController', 'UntrackCustomPositionMappin', function(self) customMappin = nil end)
+  --Observe('ExitEvents', 'OnEnter', function()
+  --  local veh = GetPlayer():GetMountedVehicle()
+  --  if veh then VehicleCancelLastCommand(veh) end
+  --end)
 end
 
 return Player

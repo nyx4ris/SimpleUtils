@@ -58,11 +58,11 @@ local function smartQuote(str)
    return '"' .. gsub(str, '"', '\\"') .. '"'
 end
 
-
 local shortControlCharEscapes = {
    ["\a"] = "\\a", ["\b"] = "\\b", ["\f"] = "\\f", ["\n"] = "\\n",
    ["\r"] = "\\r", ["\t"] = "\\t", ["\v"] = "\\v", ["\127"] = "\\127",
 }
+
 local longControlCharEscapes = { ["\127"] = "\127" }
 for i = 0, 31 do
    local ch = char(i)
@@ -216,18 +216,7 @@ local function puts(buf, str)
    buf[buf.n] = str
 end
 
-
-
 local Inspector = {}
-
-
-
-
-
-
-
-
-
 
 local Inspector_mt = { __index = Inspector }
 
@@ -309,7 +298,11 @@ function Inspector:putValue(v)
       end
 
    else
-      puts(buf, fmt('<%s %d>', tv, self:getId(v)))
+      if tv == "userdata" then
+         puts(buf, fmt('<%s %d>', GameDump(v), self:getId(v)))
+      else
+         puts(buf, fmt('<%s %d>', tv, self:getId(v)))
+      end
    end
 end
 
