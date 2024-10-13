@@ -29,6 +29,8 @@ function VehicleUI:Filter()
 
   for k, v in pairs(vs:GetPlayerVehicles()) do
     local name = SimpleUtils.Dumper.Vehicles[v.recordID.value]
+    if not name then name = v.recordID.value end
+
     models[name] = v.name.value
     if algorithm ~= 0 then
       if (algorithm == 1 and fzy or jw)(filter, name) then
@@ -43,6 +45,7 @@ function VehicleUI:Filter()
     end
 
     enabled[v.recordID.value] = v.isUnlocked
+    ::continue::
   end
 
   filteredvehicles = filtered

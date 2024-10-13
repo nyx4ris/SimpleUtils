@@ -10,11 +10,7 @@ local noReload = false
 local vehicleGodMode = false
 local infiniteVehicleAmmo = false
 
-local targets = {
-  "Custom Map Pin",
-  "Mission Marker (NOT IMPLEMENTED YET)",
-  "0, 0, 0 [DEBUG]"
-}
+local targets = {"Custom Map Pin", "Mission Marker (NOT IMPLEMENTED YET)", "0, 0, 0 [DEBUG]"}
 local target = (build == "{commit}" and 2 or 0)
 local clearTraffic = true
 local useKinematic = true
@@ -107,21 +103,17 @@ function Player:DrawGUI()
       if ImGui.Button(" Activate ") then
         local dest = Vector3.new(0, 0, 0)
 
-        if target == 0 then
-          dest = customMappin:GetWorldPosition():Vector4To3()
-        end
+        if target == 0 then dest = customMappin:GetWorldPosition():Vector4To3() end
 
         Autopilot(veh, dest, minSpeed, maxSpeed, clearTraffic, useKinematic, minDist)
       end
       local hovered = ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled)
 
-      if target == 0 and not customMappin then ImGui.EndDisabled() end
+      if target == 0 and not customMappin and veh then ImGui.EndDisabled() end
 
       ImGui.SameLine()
-      if ImGui.Button(GetState(veh) or " Cancel ") then
-        VehicleCancelLastCommand(veh)
-      end
-      hovered = hovered or (customMappin and ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+      if ImGui.Button(" Cancel ") then VehicleCancelLastCommand(veh) end
+      hovered = hovered or ((customMappin or not veh) and ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
 
       if not veh then ImGui.EndDisabled() end
 
@@ -134,8 +126,10 @@ function Player:DrawGUI()
           end
         end
       end
-      
-      ImGui.Text(inspect(SimpleUtils.Vehicle.LastCommand))
+
+      for k, v in pairs(SimpleUtils.Vehicle.LastCommand) do
+        ImGui.Text("[" .. k .. "] " .. tostring(v.state))
+      end
 
       ImGui.EndTabItem()
     end
@@ -168,10 +162,10 @@ end
 function Player:OnInit()
   Observe('BaseWorldMapMappinController', 'OnUpdate', function(self) if self:GetMappinVariant() == gamedataMappinVariant.CustomPositionVariant then customMappin = self:GetMappin() end end)
   Observe('WorldMapMenuGameController', 'UntrackCustomPositionMappin', function(self) customMappin = nil end)
-  --Observe('ExitEvents', 'OnEnter', function()
-  --  local veh = GetPlayer():GetMountedVehicle()
-  --  if veh then VehicleCancelLastCommand(veh) end
-  --end)
+  Observe('ExitEvents', 'OnEnter', function()
+    local veh = GetPlayer():GetMountedVehicle()
+    if veh then VehicleCancelLastCommand(veh) end
+  end)
 end
 
 return Player

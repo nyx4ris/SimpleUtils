@@ -47,13 +47,3 @@ function Autopilot(veh, target, minSpeed, maxSpeed, clearTraffic, useKinematic, 
   AINPCCommandEvent.command = cmd
   veh:QueueEvent(AINPCCommandEvent)
 end
-
-function GetState(veh)
-  if veh == nil then return " No vehicle " end
-
-  local vehId = tostring(veh:GetEntityID().hash)
-  local lastcmd = SimpleUtils.Vehicle.LastCommand[vehId]
-  if lastcmd == nil then return " No state " end
-
-  return tostring(lastcmd.state)
-end
