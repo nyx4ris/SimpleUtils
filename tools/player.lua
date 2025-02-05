@@ -64,16 +64,8 @@ function Player:DrawGUI()
       infiniteAmmo = ImGui.Checkbox(IconGlyphs.Ammunition .. " Infinite Ammo", infiniteAmmo)
       noReload = ImGui.Checkbox(IconGlyphs.MagazineRifle .. " No Reload", noReload)
 
-      local toggle
-      godMode, toggle = ImGui.Checkbox(IconGlyphs.Skull .. " Godmode", godMode)
-      if toggle then
-        if godMode then
-          Game.GetGodModeSystem():AddGodMode(GetPlayer():GetEntityID(), gameGodModeType.Immortal, 'Default')
-        else
-          Game.GetGodModeSystem():RemoveGodMode(GetPlayer():GetEntityID(), gameGodModeType.Immortal, 'Default')
-        end
-      end
-
+      godMode = ImGui.Checkbox(IconGlyphs.Skull .. " Godmode", godMode)
+      
       local newPrevSysState, pressed = ImGui.Checkbox(IconGlyphs.PoliceBadge .. " Crime Prevention", prevSys.systemEnabled)
       if pressed then
         prevSys:TogglePreventionSystem(newPrevSysState)
@@ -146,11 +138,8 @@ function Player:DrawGUI()
 
     if ImGui.BeginTabItem(IconGlyphs.IntegratedCircuitChip .. " Hacking") then
       ImGui.Spacing()
-      ImGui.Text("Not implemented yet, unfortunately.")
-      local used = false
-      recoverySpeed, used = ImGui.SliderFloat("Recovery rate", recoverySpeed, 1, 10, "%.1fx", ImGuiSliderFlags.Logarithmic)
-      quickhackCost, used = ImGui.SliderFloat("Cost Multiplier", quickhackCost, 0.001, 1, "%.3fx", ImGuiSliderFlags.Logarithmic)
-      quickhackSpeed, used = ImGui.SliderFloat("Upload Speed", quickhackSpeed, 0.001, 1, "%.3fx", ImGuiSliderFlags.Logarithmic)
+      quickhackCost = ImGui.SliderFloat("Cost Multiplier", quickhackCost, 0.001, 1, "%.2fx")
+      quickhackSpeed = ImGui.SliderFloat("Upload Speed", quickhackSpeed, 1, 10, "%.0fx")
 
       ImGui.EndTabItem()
     end
@@ -160,11 +149,29 @@ function Player:DrawGUI()
 end
 
 function Player:OnInit()
-  Observe('BaseWorldMapMappinController', 'OnUpdate', function(self) if self:GetMappinVariant() == gamedataMappinVariant.CustomPositionVariant then customMappin = self:GetMappin() end end)
+  Observe('BaseWorldMapMappinController', 'OnUpdate', function(ev) if ev:GetMappinVariant() == gamedataMappinVariant.CustomPositionVariant then customMappin = ev:GetMappin() end end)
   Observe('WorldMapMenuGameController', 'UntrackCustomPositionMappin', function(self) customMappin = nil end)
   Observe('ExitEvents', 'OnEnter', function()
     local veh = GetPlayer():GetMountedVehicle()
     if veh then VehicleCancelLastCommand(veh) end
+  end)
+
+  ObserveBefore('StatPoolsManager', 'ApplyDamage;gameHitEventBoolarray<SDamageDealt>', function(hitEvent, _)
+    if not godMode then return end;
+
+    if hitEvent.target:IsPlayer() then
+      hitEvent.attackComputed:SetAttackValues({0})
+    end
+  end)
+
+  Override('BaseScriptableAction', 'GetCost', function(self, wrappedMethod)
+    local cost = wrappedMethod()
+    return math.floor(cost * quickhackCost)
+  end)
+
+  Override('BaseScriptableAction', 'GetActivationTime', function(self, wrappedMethod)
+    local cost = wrappedMethod()
+    return cost * (1 / quickhackSpeed)
   end)
 end
 

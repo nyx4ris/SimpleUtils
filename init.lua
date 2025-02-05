@@ -74,7 +74,7 @@ function SimpleUtils:Render()
       return
     end
     if Game.GetPlayer() == nil then
-      ImGui.SetWindowSize(175, 77)
+      ImGui.SetWindowSize(175 * SimpleUtils.DPI, 77 * SimpleUtils.DPI)
       ImGui.Text("Player is not initialized yet.\nPlease wait...")
 
       ImGui.End()
@@ -87,7 +87,7 @@ function SimpleUtils:Render()
       self:Tab(IconGlyphs.Car, " Vehicles", function() SimpleUtils.VehicleUI:DrawGUI() end)
       self:Tab(IconGlyphs.MapMarker, " Teleporter", function() SimpleUtils.Teleporter:DrawGUI() end)
       self:Tab(IconGlyphs.Information, " About", function()
-        ImGui.SetWindowSize(175, 112)
+        ImGui.SetWindowSize(175 * SimpleUtils.DPI, 112 * SimpleUtils.DPI)
 
         ImGui.Text("SimpleUtils by Nyx")
         ImGui.Text("Build: " .. (build == "{commit}" and "dev" or build))
