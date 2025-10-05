@@ -7,7 +7,7 @@ ImGui = ImGui or {}
 local infiniteAmmo = false
 local noReload = false
 
-local vehicleGodMode = false
+--[[local vehicleGodMode = false
 local infiniteVehicleAmmo = false
 
 local targets = {"Custom Map Pin", "Mission Marker (NOT IMPLEMENTED YET)", "0, 0, 0 [DEBUG]"}
@@ -16,12 +16,12 @@ local clearTraffic = true
 local useKinematic = true
 local minDist = 0
 local minSpeed = 15
-local maxSpeed = 30
+local maxSpeed = 30]]
 
 local recoverySpeed = 1
 local quickhackCost = 1
 local quickhackSpeed = 1
-local customMappin
+--local customMappin
 
 local godMode = false
 
@@ -55,8 +55,6 @@ end
 function Player:DrawGUI()
   if not Player.Enabled then return end
 
-  ImGui.SetWindowSize(360, 480)
-
   if ImGui.BeginTabBar("Tabs") then
     local prevSys = GameInstance.GetScriptableSystemsContainer():Get("PreventionSystem")
     if ImGui.BeginTabItem(IconGlyphs.Cog .. " General") then
@@ -80,7 +78,7 @@ function Player:DrawGUI()
       ImGui.EndTabItem()
     end
 
-    local veh = GetPlayer():GetMountedVehicle()
+--[[    local veh = GetPlayer():GetMountedVehicle()
     if ImGui.BeginTabItem(IconGlyphs.Car .. " Autopilot") then
       ImGui.Spacing()
 
@@ -134,7 +132,7 @@ function Player:DrawGUI()
       infiniteVehicleAmmo = ImGui.Checkbox(IconGlyphs.Ammunition .. " Infinite vehicle ammo", infiniteVehicleAmmo)
 
       ImGui.EndTabItem()
-    end
+    end]]
 
     if ImGui.BeginTabItem(IconGlyphs.IntegratedCircuitChip .. " Hacking") then
       ImGui.Spacing()
@@ -149,15 +147,15 @@ function Player:DrawGUI()
 end
 
 function Player:OnInit()
-  Observe('BaseWorldMapMappinController', 'OnUpdate', function(ev) if ev:GetMappinVariant() == gamedataMappinVariant.CustomPositionVariant then customMappin = ev:GetMappin() end end)
+--[[  Observe('BaseWorldMapMappinController', 'OnUpdate', function(ev) if ev:GetMappinVariant() == gamedataMappinVariant.CustomPositionVariant then customMappin = ev:GetMappin() end end)
   Observe('WorldMapMenuGameController', 'UntrackCustomPositionMappin', function(self) customMappin = nil end)
   Observe('ExitEvents', 'OnEnter', function()
     local veh = GetPlayer():GetMountedVehicle()
     if veh then VehicleCancelLastCommand(veh) end
-  end)
+  end)]]
 
   ObserveBefore('StatPoolsManager', 'ApplyDamage;gameHitEventBoolarray<SDamageDealt>', function(hitEvent, _)
-    if not godMode then return end;
+    if not godMode then return end
 
     if hitEvent.target:IsPlayer() then
       hitEvent.attackComputed:SetAttackValues({0})

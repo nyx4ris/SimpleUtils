@@ -7,9 +7,9 @@ require("info")
 SimpleUtils.ItemUI = require("tools/itemui")
 SimpleUtils.VehicleUI = require("tools/vehicleui")
 SimpleUtils.Dumper = require("tools/dumper")
-SimpleUtils.Teleporter = require("tools/teleport")
+--SimpleUtils.Teleporter = require("tools/teleport")
 SimpleUtils.Player = require("tools/player")
-SimpleUtils.Debug = (build == "{commit}")
+SimpleUtils.Debug = false
 
 local isOverlayVisible = false
 
@@ -24,10 +24,14 @@ SimpleUtils.FPS = 0
 function SimpleUtils:UpdateFPS(delta) SimpleUtils.FPS = 1 / delta end
 
 function SimpleUtils:Tab(icon, name, callback)
-  if ImGui.BeginTabItem(icon) then
+  local tab = ImGui.BeginTabItem(icon)
+  if ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) then
+    ImGui.SetTooltip(name)
+  end
+
+  if tab then
     ImGui.Spacing()
     callback()
-
     ImGui.EndTabItem()
   end
 end
@@ -68,13 +72,12 @@ function SimpleUtils:Render()
     ImGui.End()
   end
 
-  if isOverlayVisible and ImGui.Begin(IconGlyphs.Cog .. ' Simple Utils', ImGuiWindowFlags.NoResize) then
+  if isOverlayVisible and ImGui.Begin(IconGlyphs.Cog .. ' Simple Utils') then
     if ImGui.IsWindowCollapsed() then
       ImGui.End()
       return
     end
     if Game.GetPlayer() == nil then
-      ImGui.SetWindowSize(175 * SimpleUtils.DPI, 77 * SimpleUtils.DPI)
       ImGui.Text("Player is not initialized yet.\nPlease wait...")
 
       ImGui.End()
@@ -82,13 +85,11 @@ function SimpleUtils:Render()
     end
 
     if ImGui.BeginTabBar("Tabs") then
-      self:Tab(IconGlyphs.Account, " Player", function() SimpleUtils.Player:DrawGUI() end)
-      self:Tab(IconGlyphs.StorageTank, " Items", function() SimpleUtils.ItemUI:DrawGUI() end)
-      self:Tab(IconGlyphs.Car, " Vehicles", function() SimpleUtils.VehicleUI:DrawGUI() end)
-      self:Tab(IconGlyphs.MapMarker, " Teleporter", function() SimpleUtils.Teleporter:DrawGUI() end)
-      self:Tab(IconGlyphs.Information, " About", function()
-        ImGui.SetWindowSize(175 * SimpleUtils.DPI, 112 * SimpleUtils.DPI)
-
+      self:Tab(IconGlyphs.Account, "Player", function() SimpleUtils.Player:DrawGUI() end)
+      self:Tab(IconGlyphs.StorageTank, "Items", function() SimpleUtils.ItemUI:DrawGUI() end)
+      self:Tab(IconGlyphs.Car, "Vehicles", function() SimpleUtils.VehicleUI:DrawGUI() end)
+      --self:Tab(IconGlyphs.MapMarker, "Teleporter", function() SimpleUtils.Teleporter:DrawGUI() end)
+      self:Tab(IconGlyphs.Information, "About", function()
         ImGui.Text("SimpleUtils by Nyx")
         ImGui.Text("Build: " .. (build == "{commit}" and "dev" or build))
       end)

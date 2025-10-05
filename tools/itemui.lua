@@ -141,27 +141,25 @@ end
 function ItemUI:DrawGUI()
   if not ItemUI.Enabled then return end
 
-  ImGui.SetWindowSize(720, 480)
-
   ImGui.Text("Count")
   ImGui.SameLine()
   ImGui.SetNextItemWidth(127)
   count = ImGui.InputInt("##Count", count, 1, 10)
   count = math.max(count, 1)
 
-  ImGui.SameLine(ImGui.GetWindowWidth() - 315)
+  ImGui.SameLine(ImGui.GetWindowWidth() - (256 + 8 + (128 + 8)))
 
-  ImGui.Text("Filter")
-  ImGui.SameLine(ImGui.GetWindowWidth() - (255 + 5 + 20))
-  ImGui.SetNextItemWidth(128)
+  ImGui.SetNextItemWidth(256)
   local newFilter = ImGui.InputText("##Filter", filter, 128)
   if newFilter ~= filter then
     filter = newFilter
-
     self:Filter()
   end
+  if ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) then
+    ImGui.SetTooltip("Filter")
+  end
 
-  ImGui.SameLine(ImGui.GetWindowWidth() - (128 + 20))
+  ImGui.SameLine(ImGui.GetWindowWidth() - (128 + 8))
   ImGui.SetNextItemWidth(128)
   local newQuality = ImGui.Combo("##Quality", filterQuality, qualities, #qualities)
   if newQuality ~= filterQuality then
@@ -169,17 +167,20 @@ function ItemUI:DrawGUI()
 
     self:Filter()
   end
+  if ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) then
+    ImGui.SetTooltip("Quality")
+  end
 
   ImGui.Text("Note: Some items cannot easily be removed once added.")
-  ImGui.SameLine(ImGui.GetWindowWidth() - 315)
-  ImGui.Text("Algorithm")
-  ImGui.SameLine(ImGui.GetWindowWidth() - 148)
+  ImGui.SameLine(ImGui.GetWindowWidth() - (128 + 8))
   ImGui.SetNextItemWidth(128)
   local newAlgorithm = ImGui.Combo("##Algorithm", algorithm, algorithms, #algorithms)
   if newAlgorithm ~= algorithm then
     algorithm = newAlgorithm
-
     self:Filter()
+  end
+  if ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) then
+    ImGui.SetTooltip("Filter Algorithm")
   end
 
   ImGui.Spacing()

@@ -9,6 +9,9 @@ local algorithm = 0
 local hasMatches = true
 local filteredvehicles = {}
 
+local hideQuest = true
+local hideUntranslated = true
+
 local algorithms = {"string.find", "fzy"}
 
 local function RGBtoPackedABGR(color)
@@ -25,20 +28,23 @@ function VehicleUI:Filter()
   local vs = Game.GetVehicleSystem()
 
   local filtered = {}
-  hasMatches = true
+  hasMatches = false
 
   for k, v in pairs(vs:GetPlayerVehicles()) do
-    local name = SimpleUtils.Dumper.Vehicles[v.recordID.value]
-    if not name then name = v.recordID.value end
+    local name = SimpleUtils.Dumper.Vehicles[v.recordID.value] or v.recordID.value
+    local displayName = name:gsub("Vehicle.", "Untranslated: ")
 
     models[name] = v.name.value
+    if displayName ~= name and hideUntranslated then goto continue end
+    if v.recordID.value:match("Vehicle.q.*") and hideQuest then goto continue end
+
     if algorithm ~= 0 then
-      if (algorithm == 1 and fzy or jw)(filter, name) then
+      if (algorithm == 1 and fzy or jw)(filter, displayName) then
         hasMatches = true
         filtered[name] = v.recordID.value
       end
     else
-      if string.find(name:lower(), filter:lower(), 0, true) then
+      if string.find(displayName:lower(), filter:lower(), 0, true) then
         hasMatches = true
         filtered[name] = v.recordID.value
       end
@@ -56,26 +62,40 @@ function VehicleUI:DrawGUI()
 
   local vs = Game.GetVehicleSystem()
 
-  ImGui.SetWindowSize(720, 480)
-
-  ImGui.Text("Filter")
-  ImGui.SameLine()
-  ImGui.SetNextItemWidth(128 + 256)
+  ImGui.SetNextItemWidth(ImGui.GetWindowWidth() - (128 + 48))
   local newFilter = ImGui.InputText("##Filter", filter, 128)
   if newFilter ~= filter then
     filter = newFilter
-
     self:Filter()
   end
+  if ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) then
+    ImGui.SetTooltip("Filter")
+  end
 
-  ImGui.SameLine(ImGui.GetWindowWidth() - 215)
-  ImGui.Text("Algorithm")
-  ImGui.SameLine(ImGui.GetWindowWidth() - 148)
+  ImGui.SameLine(ImGui.GetWindowWidth() - (128 + 32))
   ImGui.SetNextItemWidth(128)
   local newAlgorithm = ImGui.Combo("##Algorithm", algorithm, algorithms, #algorithms)
   if newAlgorithm ~= algorithm then
     algorithm = newAlgorithm
+    self:Filter()
+  end
+  if ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) then
+    ImGui.SetTooltip("Filter Algorithm")
+  end
 
+  local pressed = false
+  hideUntranslated, pressed = ImGui.Checkbox("Hide untranslated", hideUntranslated)
+  if pressed then
+    self:Filter()
+  end
+  if ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled) then
+    ImGui.SetTooltip("Untranslated vehicles are usually not meant to be driven.")
+  end
+
+  ImGui.SameLine()
+  pressed = false
+  hideQuest, pressed = ImGui.Checkbox("Hide quest vehicles", hideQuest)
+  if pressed then
     self:Filter()
   end
 
@@ -87,10 +107,11 @@ function VehicleUI:DrawGUI()
     ImGui.Text("No matches found for \"" .. filter .. "\"\nPlease try another query.")
   else
     for vehicle, id in pairs(filteredvehicles) do
-      local name = SimpleUtils.Dumper.Vehicles[id]
+      local name = SimpleUtils.Dumper.Vehicles[id] or id
+      local displayName = name:gsub("Vehicle.", "Untranslated: ")
       local record = SimpleUtils.Dumper.Records[id]
 
-      local newState, pressed = ImGui.Checkbox(name, enabled[id] or false)
+      local newState, pressed = ImGui.Checkbox(displayName, enabled[id] or false)
       if pressed then
         vs:EnablePlayerVehicle(id, newState, false)
         SimpleUtils.Logger:Log("VehicleUI", (newState and "En" or "Dis") .. "abled " .. id)
@@ -105,7 +126,7 @@ function VehicleUI:DrawGUI()
         ImGui.BeginTooltip()
 
         ImGui.PushStyleColor(ImGuiCol.Text, RGBtoPackedABGR({52, 152, 219}))
-        ImGui.Text(name)
+        ImGui.Text(displayName)
         ImGui.PopStyleColor()
 
         ImGui.PushStyleColor(ImGuiCol.Text, RGBtoPackedABGR({231, 76, 60}))
@@ -118,6 +139,7 @@ function VehicleUI:DrawGUI()
 
         ImGui.EndTooltip()
       end
+      ::continue::
     end
   end
 end
